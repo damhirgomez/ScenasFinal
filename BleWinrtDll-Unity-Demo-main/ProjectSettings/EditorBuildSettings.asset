@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1045 &1
+EditorBuildSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/BleTest.unity
+    guid: 9fc0d4010bbf28b4594072e72b8655ab
+  - enabled: 1
+    path: Assets/Scenes/nimble_recording1.unity
+    guid: 1dad4badff226a24b9cb4573e4cf41be
+  - enabled: 1
+    path: Assets/Scenes/Menu.unity
+    guid: bac05f5ee126f6b448566ca36f76496a
+  - enabled: 1
+    path: Assets/Scenes/nimble_menu.unity
+    guid: 0d8c7e324d0293645be234cbf079a250
+  - enabled: 1
+    path: Assets/Scenes/nimble_connect.unity
+    guid: 00090f7d892109a4f9c9b97689b5af91
+  - enabled: 1
+    path: Assets/Scenes/nimble_connected.unity
+    guid: 4cc128eec9c891d42a1c460d838066a0
+  - enabled: 1
+    path: Assets/Scenes/nimble_failed.unity
+    guid: 16a0f7eb95dcbd24dbb68b156a5c92df
+  - enabled: 1
+    path: Assets/Scenes/nimble_FileName.unity
+    guid: ef2479dfc319365428b149c1550adc20
+  - enabled: 1
+    path: Assets/Scenes/nimble_REC.unity
+    guid: acd87ffcebbc04d4a9697de7cbbecec9
+  m_configObjects: {}
