@@ -36,12 +36,12 @@ public class BleTest : MonoBehaviour
         InputText, TextTargetDeviceData8, TextTargetDeviceData9, TextTargetDeviceData10;
     public Button ButtonEstablishConnection, ButtonStartScan;
     float acx, lastAcx, acy, lastAcy, acz, lastAcz, gyrox, lastGyrox, gyroy, lastGyroy, gyroz, lastGyroz, pres1, lastPres1, pres2, lastPres2, pres3, lastPres3, trigger; //damhi
-    string datos, LastDato, TextInput;//damhir
+    string datos, LastDato, TextInput, record;//damhir
     public string input;
     public InputField FileEnter;
     public GameObject CanvasConnected;
     public GameObject CanvasFailed;
-    public GameObject CanvasFileName, CanvasRec, CanvasRecording;
+    public GameObject CanvasFileName, CanvasRec, CanvasRecording, CanvasSaved;
 
     // Start is called before the first frame update
     void Start()
@@ -52,6 +52,7 @@ public class BleTest : MonoBehaviour
         CanvasFileName.SetActive(false);
         CanvasRec.SetActive(false);
         CanvasRecording.SetActive(false);
+        CanvasSaved.SetActive(false);
         ble = new BLE();
         //StablishConnection.enabled = false;
         //TextTargetDeviceConnection.text = targetDeviceName + " not found.";
@@ -149,6 +150,13 @@ public class BleTest : MonoBehaviour
     {
         CanvasRecording.SetActive(true);
         CanvasRec.SetActive(false);
+
+    }
+    public void ChangeSceneCanvasSaved()
+    {
+        CanvasRecording.SetActive(false);
+        CanvasSaved.SetActive(true);
+        record = "";
 
     }
     // Prevent threading issues and free BLE stack.
@@ -307,7 +315,7 @@ public class BleTest : MonoBehaviour
                     char delimitador = ',';
 
                     string[] valores = datos.Split(delimitador);
-                    if (valores[8] != "" && trigger == 2)
+                    if (record == "1" && trigger == 2)
                     {
                         ChangeSceneCanvasRecording();
                     }
@@ -337,6 +345,8 @@ public class BleTest : MonoBehaviour
                     TextTargetDeviceData8.text = "press 2: " + valores[7];
 
                     TextTargetDeviceData9.text = "press 3: " + valores[8];
+
+                    record = "1";//valores[9];
                     LastDato = datos;
                     String dateNow = DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss");
                     TextInput = input;
@@ -360,7 +370,14 @@ public class BleTest : MonoBehaviour
         scan.Found = (_deviceId, deviceName) =>
         {
             Debug.Log("found device with name: " + deviceName); 
-            discoveredDevices.Add(_deviceId, deviceName);
+            try
+            {
+                discoveredDevices.Add(_deviceId, deviceName);
+            }
+            catch(Exception e)
+            {
+                Debug.Log("Error trying to ADD the device" + e);
+            }
 
             if (deviceId == null && deviceName == targetDeviceName)
                 deviceId = _deviceId;
@@ -406,6 +423,7 @@ public class BleTest : MonoBehaviour
             } catch(Exception e)
             {
                 Debug.Log("Could not establish connection to device with ID " + deviceId + "\n" + e);
+                CanvasFailed.SetActive(true);
             }
         }
         if (ble.isConnected)
