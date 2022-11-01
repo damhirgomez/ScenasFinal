@@ -35,19 +35,23 @@ public class BleTest : MonoBehaviour
     public Text TextDiscoveredDevices, TextIsScanning, TextTargetDeviceConnection, TextTargetDeviceData1, TextTargetDeviceData2, TextTargetDeviceData3, TextTargetDeviceData4, TextTargetDeviceData5, TextTargetDeviceData6, TextTargetDeviceData7, 
         InputText, TextTargetDeviceData8, TextTargetDeviceData9, TextTargetDeviceData10;
     public Button ButtonEstablishConnection, ButtonStartScan;
-    float acx, lastAcx, acy, lastAcy, acz, lastAcz, gyrox, lastGyrox, gyroy, lastGyroy, gyroz, lastGyroz, pres1, lastPres1, pres2, lastPres2, pres3, lastPres3; //damhi
+    float acx, lastAcx, acy, lastAcy, acz, lastAcz, gyrox, lastGyrox, gyroy, lastGyroy, gyroz, lastGyroz, pres1, lastPres1, pres2, lastPres2, pres3, lastPres3, trigger; //damhi
     string datos, LastDato, TextInput;//damhir
     public string input;
     public InputField FileEnter;
     public GameObject CanvasConnected;
-    public GameObject CanvasFailed; 
-    public GameObject CanvasFileName;
+    public GameObject CanvasFailed;
+    public GameObject CanvasFileName, CanvasRec, CanvasRecording;
+
     // Start is called before the first frame update
     void Start()
     {
+        trigger = 0;
         CanvasConnected.SetActive(false);
         CanvasFailed.SetActive(false);
         CanvasFileName.SetActive(false);
+        CanvasRec.SetActive(false);
+        CanvasRecording.SetActive(false);
         ble = new BLE();
         //StablishConnection.enabled = false;
         //TextTargetDeviceConnection.text = targetDeviceName + " not found.";
@@ -132,6 +136,19 @@ public class BleTest : MonoBehaviour
     {
         CanvasFileName.SetActive(true);
         CanvasConnected.SetActive(false);
+        trigger = trigger + 1;
+
+    }
+    public void ChangeSceneCanvasRec()
+    {
+        CanvasRec.SetActive(true);
+        CanvasFileName.SetActive(false);
+        trigger = trigger + 1;
+    }
+    public void ChangeSceneCanvasRecording()
+    {
+        CanvasRecording.SetActive(true);
+        CanvasRec.SetActive(false);
 
     }
     // Prevent threading issues and free BLE stack.
@@ -290,7 +307,10 @@ public class BleTest : MonoBehaviour
                     char delimitador = ',';
 
                     string[] valores = datos.Split(delimitador);
-
+                    if (valores[8] != "" && trigger == 2)
+                    {
+                        ChangeSceneCanvasRecording();
+                    }
                     TextTargetDeviceData1.text = "Acx: " + valores[0];
 
 
@@ -310,13 +330,13 @@ public class BleTest : MonoBehaviour
 
 
 
-                    TextTargetDeviceData6.text = "gyroz: " + valores[5];
+                    TextTargetDeviceData6.text = "gyroz: " + valores[5]; 
 
-                    TextTargetDeviceData8.text = "press 1: " + valores[6];
+                    TextTargetDeviceData7.text = "press 1: " + valores[6];
 
-                    TextTargetDeviceData9.text = "press 2: " + valores[7];
+                    TextTargetDeviceData8.text = "press 2: " + valores[7];
 
-                    TextTargetDeviceData10.text = "press 3: " + valores[8];
+                    TextTargetDeviceData9.text = "press 3: " + valores[8];
                     LastDato = datos;
                     String dateNow = DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss");
                     TextInput = input;
