@@ -124,13 +124,13 @@ public class BleTest : MonoBehaviour
 
     private void OnDestroy()
     {
-        ble.Close();
+        
         CleanUp();
     }
 
     private void OnApplicationQuit()
     {
-        ble.Close();
+        
         CleanUp();
     }
     public void ChangeSceneFilename()
@@ -346,7 +346,7 @@ public class BleTest : MonoBehaviour
 
                     TextTargetDeviceData9.text = "press 3: " + valores[8];
 
-                    record = "1";//valores[9];
+                    record = valores[9];
                     LastDato = datos;
                     String dateNow = DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss");
                     TextInput = input;
