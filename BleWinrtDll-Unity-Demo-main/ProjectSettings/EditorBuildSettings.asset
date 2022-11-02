@@ -11,15 +11,15 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/nimble_recording1.unity
     guid: 1dad4badff226a24b9cb4573e4cf41be
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Menu.unity
     guid: bac05f5ee126f6b448566ca36f76496a
   - enabled: 1
-    path: Assets/Scenes/nimble_menu.unity
-    guid: 0d8c7e324d0293645be234cbf079a250
-  - enabled: 1
     path: Assets/Scenes/nimble_connect.unity
     guid: 00090f7d892109a4f9c9b97689b5af91
+  - enabled: 0
+    path: Assets/Scenes/nimble_menu.unity
+    guid: 0d8c7e324d0293645be234cbf079a250
   - enabled: 0
     path: Assets/Scenes/nimble_connected.unity
     guid: 4cc128eec9c891d42a1c460d838066a0

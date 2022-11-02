@@ -23,36 +23,43 @@ public class BleTest : MonoBehaviour
 
     BLE ble;
     BLE.BLEScan scan;
-    bool isScanning = false, isConnected = false, StablishConnection = false;
+    bool isScanning = false, isConnected = false, StablishConnection = false, isEmpty = false, trigger = false, triggerFail = false, triggerRecording = false, triggerSave = false, triggerToSave = false;
     string deviceId = null;  
     IDictionary<string, string> discoveredDevices = new Dictionary<string, string>();
     int devicesCount = 0;
-
+    string[] valores;
+    char delimitador;
     // BLE Threads 
     Thread scanningThread, connectionThread, readingThread;
 
     // GUI elements
     public Text TextDiscoveredDevices, TextIsScanning, TextTargetDeviceConnection, TextTargetDeviceData1, TextTargetDeviceData2, TextTargetDeviceData3, TextTargetDeviceData4, TextTargetDeviceData5, TextTargetDeviceData6, TextTargetDeviceData7, 
-        InputText, TextTargetDeviceData8, TextTargetDeviceData9, TextTargetDeviceData10;
+        InputText, TextTargetDeviceData8, TextTargetDeviceData9, TextTargetDeviceData10, NameOfFile;
     public Button ButtonEstablishConnection, ButtonStartScan;
-    float acx, lastAcx, acy, lastAcy, acz, lastAcz, gyrox, lastGyrox, gyroy, lastGyroy, gyroz, lastGyroz, pres1, lastPres1, pres2, lastPres2, pres3, lastPres3, trigger; //damhi
+    float acx, lastAcx, acy, lastAcy, acz, lastAcz, gyrox, lastGyrox, gyroy, lastGyroy, gyroz, lastGyroz, pres1, lastPres1, pres2, lastPres2, pres3, lastPres3; //damhi
     string datos, LastDato, TextInput, record;//damhir
     public string input;
-    public InputField FileEnter;
+    public InputField FileEnter2;
     public GameObject CanvasConnected;
     public GameObject CanvasFailed;
-    public GameObject CanvasFileName, CanvasRec, CanvasRecording, CanvasSaved;
+    public GameObject CanvasFileName, CanvasRec, CanvasRecording, CanvasPrincipal, CanvasNimbleMenu, CanvasNimbleConnect, CanvasNimbleSaved;
+    public Image WristbandStatusOff_NimbleMenu, WristbandStatusOn_NimbleMenu, WristbandStatusOn_NimbleSave, WristbandStatusOff_NimbleSave;
 
     // Start is called before the first frame update
     void Start()
     {
-        trigger = 0;
+        WristbandStatusOff_NimbleMenu.enabled = true;
+        WristbandStatusOn_NimbleMenu.enabled = false;
+        CanvasPrincipal.SetActive(true);
+        CanvasNimbleSaved.SetActive(false);
+        CanvasNimbleMenu.SetActive(false);
+        CanvasNimbleConnect.SetActive(false);
         CanvasConnected.SetActive(false);
         CanvasFailed.SetActive(false);
         CanvasFileName.SetActive(false);
         CanvasRec.SetActive(false);
         CanvasRecording.SetActive(false);
-        CanvasSaved.SetActive(false);
+        
         ble = new BLE();
         //StablishConnection.enabled = false;
         //TextTargetDeviceConnection.text = targetDeviceName + " not found.";
@@ -63,7 +70,15 @@ public class BleTest : MonoBehaviour
 
     // Update is called once per frame
     void Update()
-    {  
+    {
+        if(record == "0")
+        {
+            triggerToSave = false;
+        }
+        else
+        {
+            triggerToSave = true;
+        }
         if (isScanning)
         {
             if (ButtonStartScan.enabled)
@@ -90,20 +105,23 @@ public class BleTest : MonoBehaviour
                 TextIsScanning.color = Color.white;
                 TextIsScanning.text = "Not scanning.";
             }*/
-        }
-        if(deviceId == "-1")
+        } 
+        if(deviceId == "-1" && !triggerFail)
         {
             //SceneManager.LoadScene("nimble_failed");
-            CanvasFailed.SetActive(true);
+            ChangeSceneCanvasFail();
+            triggerFail = true;
         }
         // The target device was found.
         if (deviceId != null && deviceId != "-1")
         {
             // Target device is connected and GUI knows.
-            if (ble.isConnected && isConnected)
+            if (ble.isConnected && isConnected )
             {
                 UpdateGuiText("writeData");
-                
+                trigger = true; 
+
+
             }
             // Target device is connected, but GUI hasn't updated yet.
             else if (ble.isConnected && !isConnected)
@@ -127,38 +145,158 @@ public class BleTest : MonoBehaviour
         
         CleanUp();
     }
+    public void Exit()
+    {
+        Application.Quit();
+        Debug.Log("Game is exiting");
+    }
 
     private void OnApplicationQuit()
     {
         
         CleanUp();
     }
+    public void ChangeSceneCanvasNimbleMenu()
+    {
+        WristbandStatusOff_NimbleMenu.enabled = false;
+        WristbandStatusOn_NimbleMenu.enabled = true;
+        CanvasPrincipal.SetActive(false);
+        CanvasNimbleMenu.SetActive(true);
+        CanvasNimbleConnect.SetActive(false);
+        CanvasConnected.SetActive(false);
+        CanvasFailed.SetActive(false);
+        CanvasFileName.SetActive(false);
+        CanvasRec.SetActive(false);
+        CanvasRecording.SetActive(false);
+        
+        CanvasNimbleSaved.SetActive(false);
+
+    }
+    public void ChangeSceneCanvasNimbleSaved()
+    {
+        if (trigger)
+        {
+            WristbandStatusOff_NimbleSave.enabled = false;
+            WristbandStatusOn_NimbleSave.enabled = true;
+        }
+        WristbandStatusOff_NimbleSave.enabled = true;
+        WristbandStatusOn_NimbleSave.enabled = false;
+        CanvasPrincipal.SetActive(false);
+        CanvasNimbleMenu.SetActive(false);
+        CanvasNimbleConnect.SetActive(false);
+        CanvasConnected.SetActive(false);
+        CanvasFailed.SetActive(false);
+        CanvasFileName.SetActive(false);
+        CanvasRec.SetActive(false);
+        CanvasRecording.SetActive(false);
+        
+        CanvasNimbleSaved.SetActive(true);
+
+    }
+    public void ChangeSceneCanvasConnect()
+    {
+        
+        if (trigger)
+        {
+            ChangeSceneFilename();
+        }else
+        {
+            CanvasPrincipal.SetActive(false);
+            CanvasNimbleMenu.SetActive(false);
+            CanvasNimbleConnect.SetActive(true);
+            CanvasConnected.SetActive(false);
+            CanvasFailed.SetActive(false);
+            CanvasFileName.SetActive(false);
+            CanvasRec.SetActive(false);
+            CanvasRecording.SetActive(false);
+            CanvasNimbleSaved.SetActive(false);
+        }
+       
+
+    }
+    public void ChangeSceneCanvasPrincipal()
+    {
+        
+        CanvasPrincipal.SetActive(true);
+        CanvasNimbleMenu.SetActive(false);
+        CanvasNimbleConnect.SetActive(false);
+        CanvasConnected.SetActive(false);
+        CanvasFailed.SetActive(false);
+        CanvasFileName.SetActive(false);
+        CanvasRec.SetActive(false);
+        CanvasRecording.SetActive(false);
+        CanvasNimbleSaved.SetActive(false);
+
+    }
     public void ChangeSceneFilename()
     {
-        CanvasFileName.SetActive(true);
+        CanvasPrincipal.SetActive(false);
+        CanvasNimbleMenu.SetActive(false);
+        CanvasNimbleConnect.SetActive(false);
         CanvasConnected.SetActive(false);
-        trigger = trigger + 1;
+        CanvasFailed.SetActive(false);
+        CanvasFileName.SetActive(true);
+        CanvasRec.SetActive(false);
+        CanvasRecording.SetActive(false);
+        CanvasNimbleSaved.SetActive(false);
 
     }
     public void ChangeSceneCanvasRec()
     {
-        CanvasRec.SetActive(true);
+        
+        CanvasPrincipal.SetActive(false);
+        CanvasNimbleMenu.SetActive(false);
+        CanvasNimbleConnect.SetActive(false);
+        CanvasConnected.SetActive(false);
+        CanvasFailed.SetActive(false);
         CanvasFileName.SetActive(false);
-        trigger = trigger + 1;
+        CanvasRec.SetActive(true);
+        CanvasRecording.SetActive(false);
+        CanvasNimbleSaved.SetActive(false);
+
     }
     public void ChangeSceneCanvasRecording()
     {
-        CanvasRecording.SetActive(true);
+       
+        CanvasPrincipal.SetActive(false);
+        CanvasNimbleMenu.SetActive(false);
+        CanvasNimbleConnect.SetActive(false);
+        CanvasConnected.SetActive(false);
+        CanvasFailed.SetActive(false);
+        CanvasFileName.SetActive(false);
         CanvasRec.SetActive(false);
+        CanvasRecording.SetActive(true);
+        CanvasNimbleSaved.SetActive(false);
 
     }
-    public void ChangeSceneCanvasSaved()
+    public void ChangeSceneCanvasFail()
     {
+        CanvasPrincipal.SetActive(false);
+        CanvasNimbleMenu.SetActive(false);
+        CanvasNimbleConnect.SetActive(false);
+        CanvasConnected.SetActive(false);
+        CanvasFailed.SetActive(true);
+        CanvasFileName.SetActive(false);
+        CanvasRec.SetActive(false);
         CanvasRecording.SetActive(false);
-        CanvasSaved.SetActive(true);
-        record = "";
+        
+        CanvasNimbleSaved.SetActive(false);
 
     }
+    public void NewRecordScene()
+    {
+        if (trigger)
+        {
+            ChangeSceneFilename();
+        }else
+        {
+            ChangeSceneCanvasFail();
+        }
+
+    }
+
+
+
     // Prevent threading issues and free BLE stack.
     // Can cause Unity to freeze and lead
     // to errors when omitted.
@@ -190,7 +328,7 @@ public class BleTest : MonoBehaviour
                 
         //TextIsScanning.color = new Color(244, 180, 26);
         //TextIsScanning.text = "Scanning...";
-        TextDiscoveredDevices.text = "";
+    
         
         
 
@@ -204,12 +342,14 @@ public class BleTest : MonoBehaviour
         TextTargetDeviceData4.text = "";
         TextTargetDeviceData5.text = "";
         TextTargetDeviceData6.text = "";
-        TextTargetDeviceConnection.text = targetDeviceName + " not found.";
+        //TextTargetDeviceConnection.text = targetDeviceName + " not found.";
         // Reset previous discovered devices
         discoveredDevices.Clear();
         TextDiscoveredDevices.text = "No devices.";
+        ButtonStartScan.enabled = true;
+        isScanning = false;
         CleanUp();
-        SceneManager.LoadSceneAsync(SceneManager.GetActiveScene().buildIndex);
+        //SceneManager.LoadSceneAsync(SceneManager.GetActiveScene().buildIndex);
 
     }
 
@@ -218,6 +358,9 @@ public class BleTest : MonoBehaviour
         byte[] packageReceived;
         packageReceived = BLE.ReadBytes();
         datos = Encoding.UTF8.GetString(packageReceived);
+        delimitador = ',';
+        valores = datos.Split(delimitador);
+        record = valores[9];
 
 
     }
@@ -253,7 +396,7 @@ public class BleTest : MonoBehaviour
     public void ReadInput(string s)
     {
         input = s;
-        
+        NameOfFile.text = "Name file:" + " "+ input;
     }
 
 
@@ -276,18 +419,27 @@ public class BleTest : MonoBehaviour
     //Debug.Log("Angle: " + remoteAngle);
 
 
-
+ 
     void UpdateGuiText(string action)
     {
         switch(action) {
             case "scan":
-                TextDiscoveredDevices.text = "";
-                foreach (KeyValuePair<string, string> entry in discoveredDevices)
+                TextDiscoveredDevices.text = "Scanning devices...";
+                isEmpty = discoveredDevices.Count == 0;
+                if (isEmpty)
                 {
-                    TextDiscoveredDevices.text += "DeviceID: " + entry.Key + "\nDeviceName: " + entry.Value + "\n\n";
-                    Debug.Log("Added device: " + entry.Key);
-                    
+                    TextDiscoveredDevices.text = "No devices found...";
                 }
+                else
+                {
+                    TextDiscoveredDevices.text = "";
+                    foreach (KeyValuePair<string, string> entry in discoveredDevices)
+                    {
+                        TextDiscoveredDevices.text += "DeviceID: " + entry.Key + "\nDeviceName: " + entry.Value + "\n\n";
+                        Debug.Log("Added device: " + entry.Key);
+                    }
+                }
+   
                 break;
             case "connected":
                 StablishConnection = false;
@@ -302,57 +454,66 @@ public class BleTest : MonoBehaviour
                     
                     
                     readingThread = new Thread(ReadBleData);
-                    readingThread.Start();
+                    readingThread.Start();  
 
 
 
                 }
-
-                if (datos != LastDato) //&& pres1 != lastPres1 && pres2 != lastPres2 && pres3 != lastPres3)
+                if (triggerRecording && record != "1" && !triggerSave)
                 {
-
-
-                    char delimitador = ',';
-
-                    string[] valores = datos.Split(delimitador);
-                    if (record == "1" && trigger == 2)
-                    {
-                        ChangeSceneCanvasRecording();
-                    }
-                    TextTargetDeviceData1.text = "Acx: " + valores[0];
-
-
-                    TextTargetDeviceData2.text = "Acy: " + valores[1];
-
-
-
-                    TextTargetDeviceData3.text = "Acz: " + valores[2];
-
-
-
-                    TextTargetDeviceData4.text = "gyrox: " + valores[3];
-
-
-
-                    TextTargetDeviceData5.text = "gyroy: " + valores[4];
-
-
-
-                    TextTargetDeviceData6.text = "gyroz: " + valores[5]; 
-
-                    TextTargetDeviceData7.text = "press 1: " + valores[6];
-
-                    TextTargetDeviceData8.text = "press 2: " + valores[7];
-
-                    TextTargetDeviceData9.text = "press 3: " + valores[8];
-
-                    record = valores[9];
-                    LastDato = datos;
-                    String dateNow = DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss");
-                    TextInput = input;
-                    addRecord(valores[0], valores[1], valores[2], valores[3], valores[4], valores[5], valores[6], valores[7], valores[8], dateNow, TextInput);
-
+                    ChangeSceneCanvasNimbleSaved();
+                    triggerSave = true;
                 }
+                if (record == "1")
+                {
+                    if (!triggerRecording && triggerToSave) 
+                    { 
+                        ChangeSceneCanvasRecording();
+                        triggerRecording = true;
+                    }
+           
+                    if (datos != LastDato && !triggerSave) //&& pres1 != lastPres1 && pres2 != lastPres2 && pres3 != lastPres3)
+                    {
+
+                        TextInput = input + ".csv";
+
+
+                        TextTargetDeviceData1.text = "Acx: " + valores[0];
+
+
+                        TextTargetDeviceData2.text = "Acy: " + valores[1];
+
+
+
+                        TextTargetDeviceData3.text = "Acz: " + valores[2];
+
+
+
+                        TextTargetDeviceData4.text = "gyrox: " + valores[3];
+
+
+
+                        TextTargetDeviceData5.text = "gyroy: " + valores[4];
+
+
+
+                        TextTargetDeviceData6.text = "gyroz: " + valores[5];
+
+                        TextTargetDeviceData7.text = "press 1: " + valores[6];
+
+                        TextTargetDeviceData8.text = "press 2: " + valores[7];
+
+                        TextTargetDeviceData9.text = "press 3: " + valores[8];
+                        record = valores[9];
+
+                        LastDato = datos;
+                        String dateNow = DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss");
+
+                        addRecord(valores[0], valores[1], valores[2], valores[3], valores[4], valores[5], valores[6], valores[7], valores[8], dateNow, TextInput);
+
+                    }
+                }
+
                 break;
             case "rescan":
                 StartScanHandler();
@@ -423,7 +584,7 @@ public class BleTest : MonoBehaviour
             } catch(Exception e)
             {
                 Debug.Log("Could not establish connection to device with ID " + deviceId + "\n" + e);
-                CanvasFailed.SetActive(true);
+                ChangeSceneCanvasFail();
             }
         }
         if (ble.isConnected)
