@@ -464,7 +464,7 @@ public class BleTest : MonoBehaviour
                     ChangeSceneCanvasNimbleSaved();
                     triggerSave = true;
                 }
-                if (record == "1")
+                if (record == "1" && input != "")
                 {
                     if (!triggerRecording && triggerToSave) 
                     { 
