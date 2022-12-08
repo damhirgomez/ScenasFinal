@@ -34,10 +34,10 @@ public class BleTest : MonoBehaviour
 
     // GUI elements
     public Text TextDiscoveredDevices, TextIsScanning, TextTargetDeviceConnection, TextTargetDeviceData1, TextTargetDeviceData2, TextTargetDeviceData3, TextTargetDeviceData4, TextTargetDeviceData5, TextTargetDeviceData6, TextTargetDeviceData7, 
-        InputText, TextTargetDeviceData8, TextTargetDeviceData9, TextTargetDeviceData10, NameOfFile;
+        InputText, TextTargetDeviceData8, TextTargetDeviceData9, TextTargetDeviceData10, NameOfFile, NameOfFile2;
     public Button ButtonEstablishConnection, ButtonStartScan;
     float acx, lastAcx, acy, lastAcy, acz, lastAcz, gyrox, lastGyrox, gyroy, lastGyroy, gyroz, lastGyroz, pres1, lastPres1, pres2, lastPres2, pres3, lastPres3; //damhi
-    string datos, LastDato, TextInput, record;//damhir
+    string datos, LastDato, TextInput, record, connectionOn;//damhir
     public string input;
     public InputField FileEnter2;
     public GameObject CanvasConnected;
@@ -126,6 +126,9 @@ public class BleTest : MonoBehaviour
             // Target device is connected, but GUI hasn't updated yet.
             else if (ble.isConnected && !isConnected)
             {
+                WristbandStatusOff_NimbleMenu.enabled = false;
+                WristbandStatusOn_NimbleMenu.enabled = true;
+                ChangeSceneCanvasConnect();
                 UpdateGuiText("connected");
                 isConnected = true;
             // Device was found, but not connected yet. 
@@ -136,7 +139,8 @@ public class BleTest : MonoBehaviour
                 StartConHandler();
                 
                 
-            } 
+            }
+
         } 
     }
 
@@ -158,8 +162,7 @@ public class BleTest : MonoBehaviour
     }
     public void ChangeSceneCanvasNimbleMenu()
     {
-        WristbandStatusOff_NimbleMenu.enabled = false;
-        WristbandStatusOn_NimbleMenu.enabled = true;
+
         CanvasPrincipal.SetActive(false);
         CanvasNimbleMenu.SetActive(true);
         CanvasNimbleConnect.SetActive(false);
@@ -178,9 +181,12 @@ public class BleTest : MonoBehaviour
         {
             WristbandStatusOff_NimbleSave.enabled = false;
             WristbandStatusOn_NimbleSave.enabled = true;
+        }else
+        {
+            WristbandStatusOff_NimbleSave.enabled = true;
+            WristbandStatusOn_NimbleSave.enabled = false;
         }
-        WristbandStatusOff_NimbleSave.enabled = true;
-        WristbandStatusOn_NimbleSave.enabled = false;
+
         CanvasPrincipal.SetActive(false);
         CanvasNimbleMenu.SetActive(false);
         CanvasNimbleConnect.SetActive(false);
@@ -231,6 +237,7 @@ public class BleTest : MonoBehaviour
     }
     public void ChangeSceneFilename()
     {
+
         CanvasPrincipal.SetActive(false);
         CanvasNimbleMenu.SetActive(false);
         CanvasNimbleConnect.SetActive(false);
@@ -280,7 +287,6 @@ public class BleTest : MonoBehaviour
         CanvasFileName.SetActive(false);
         CanvasRec.SetActive(false);
         CanvasRecording.SetActive(false);
-        
         CanvasNimbleSaved.SetActive(false);
 
     }
@@ -305,10 +311,11 @@ public class BleTest : MonoBehaviour
     {
         try
         {
-            
+
             
             Thread.Sleep(500);
-
+            connectionThread.Abort();
+            scanningThread.Abort(); 
         } catch(NullReferenceException e)
         {
             Debug.Log("Thread or object never initialized.\n" + e);
@@ -362,7 +369,11 @@ public class BleTest : MonoBehaviour
         delimitador = ',';
         valores = datos.Split(delimitador);
         record = valores[9];
-
+        connectionOn = "";
+        if (connectionOn == valores[10])
+        {
+            Debug.Log("hola");
+        }
 
     }
 
@@ -425,6 +436,7 @@ public class BleTest : MonoBehaviour
     {
         switch(action) {
             case "scan":
+                
                 TextDiscoveredDevices.text = "Scanning devices...";
                 isEmpty = discoveredDevices.Count == 0;
                 if (isEmpty)
@@ -440,20 +452,24 @@ public class BleTest : MonoBehaviour
                         Debug.Log("Added device: " + entry.Key);
                     }
                 }
-   
+                ChangeSceneCanvasConnect();
+
+
                 break;
             case "connected":
                 StablishConnection = false;
                 //TextTargetDeviceConnection.text = "Connected to target device:\n" + targetDeviceName;
                 //SceneManager.LoadScene("nimble_connected");
+                
                 CanvasConnected.SetActive(true);
+                
                 break;
-            case "writeData":
+            case "writeData": 
                 if (!readingThread.IsAlive)
                 {
 
-                    
-                    
+
+                    Debug.Log("dead");
                     readingThread = new Thread(ReadBleData);
                     readingThread.Start();  
 
@@ -464,7 +480,7 @@ public class BleTest : MonoBehaviour
                 {
                     ChangeSceneCanvasNimbleSaved();
                     triggerSave = true;
-                    triggerRecording = false;
+                    triggerRecording = false; 
                     input = "";
                 }
                 if (record == "1" && input != "")
@@ -475,7 +491,7 @@ public class BleTest : MonoBehaviour
                         triggerRecording = true;
                     }
            
-                    if (datos != LastDato && !triggerSave) //&& pres1 != lastPres1 && pres2 != lastPres2 && pres3 != lastPres3)
+                    if (datos != LastDato && !triggerSave)
                     {
 
                         TextInput = input + ".csv";
@@ -508,22 +524,16 @@ public class BleTest : MonoBehaviour
 
                         TextTargetDeviceData9.text = "press 3: " + valores[8];
                         record = valores[9];
-
                         LastDato = datos;
                         String dateNow = DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss");
-
+                        connectionOn = valores[10];
                         addRecord(valores[0], valores[1], valores[2], valores[3], valores[4], valores[5], valores[6], valores[7], valores[8], dateNow, TextInput);
-
+                        NameOfFile2.text = "Name file:" + " " + TextInput;
                     }
+
+
                 }
-
                 break;
-            case "rescan":
-                StartScanHandler();
-                            
-                break;
-
-
         }
     }
 
