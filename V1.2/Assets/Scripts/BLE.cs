@@ -242,7 +242,7 @@ public class BLE
     {
         Impl.BLEData packageReceived;
         bool result = Impl.PollData(out packageReceived, true);
-
+        Debug.Log("sirve: " + result);
         if (result)
         {
             Debug.Log("pack: " + result);
