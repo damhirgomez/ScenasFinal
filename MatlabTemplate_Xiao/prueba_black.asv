@@ -1,0 +1,8 @@
+function [y] = prueba_black(x,y,z,tiempo)
+i=1
+while
+y = plot(tiempo(i),x(i),'k',tiempo(i),y(i),'k',tiempo(i),z(i),'k');
+end
+
+
+
